@@ -1,0 +1,204 @@
+```cpp
+// ========================================
+// ESP32 LINE FOLLOWING ROBOT
+// Arduino IDE
+// 2 IR Sensors + L298N Motor Driver
+// ========================================
+
+
+// ---------- IR SENSOR PINS ----------
+
+#define LEFT_IR   34
+#define RIGHT_IR  35
+
+
+// ---------- LEFT MOTOR ----------
+
+#define IN1 26
+#define IN2 27
+#define ENA 33
+
+
+// ---------- RIGHT MOTOR ----------
+
+#define IN3 14
+#define IN4 25
+#define ENB 32
+
+
+// ---------- MOTOR SPEED ----------
+// ESP32 PWM range: 0 - 255
+
+int motorSpeed = 180;
+int turnSpeed = 180;
+
+
+// ========================================
+// SETUP
+// ========================================
+
+void setup() {
+
+  // IR sensors
+  pinMode(LEFT_IR, INPUT);
+  pinMode(RIGHT_IR, INPUT);
+
+  // Motor pins
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+
+  // Serial Monitor
+  Serial.begin(115200);
+
+  // Stop motors at startup
+  stopRobot();
+
+  delay(1000);
+}
+
+
+// ========================================
+// LOOP
+// ========================================
+
+void loop() {
+
+  int leftSensor = digitalRead(LEFT_IR);
+  int rightSensor = digitalRead(RIGHT_IR);
+
+
+  // Display sensor values
+  Serial.print("Left: ");
+  Serial.print(leftSensor);
+
+  Serial.print(" | Right: ");
+  Serial.println(rightSensor);
+
+
+  // ====================================
+  // LINE FOLLOWING LOGIC
+  // ====================================
+
+  // Both sensors on WHITE
+  // Robot moves forward
+
+  if (leftSensor == HIGH && rightSensor == HIGH) {
+
+    forward();
+
+  }
+
+
+  // LEFT sensor detects BLACK
+  // Robot turns LEFT
+
+  else if (leftSensor == LOW && rightSensor == HIGH) {
+
+    turnLeft();
+
+  }
+
+
+  // RIGHT sensor detects BLACK
+  // Robot turns RIGHT
+
+  else if (leftSensor == HIGH && rightSensor == LOW) {
+
+    turnRight();
+
+  }
+
+
+  // BOTH sensors detect BLACK
+  // Stop
+
+  else if (leftSensor == LOW && rightSensor == LOW) {
+
+    stopRobot();
+
+  }
+
+
+  delay(10);
+}
+
+
+// ========================================
+// FORWARD
+// ========================================
+
+void forward() {
+
+  // Left motor forward
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+
+  // Right motor forward
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  analogWrite(ENA, motorSpeed);
+  analogWrite(ENB, motorSpeed);
+}
+
+
+// ========================================
+// TURN LEFT
+// ========================================
+
+void turnLeft() {
+
+  // Left motor stop
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+
+  // Right motor forward
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  analogWrite(ENA, 0);
+  analogWrite(ENB, turnSpeed);
+}
+
+
+// ========================================
+// TURN RIGHT
+// ========================================
+
+void turnRight() {
+
+  // Left motor forward
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+
+  // Right motor stop
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+
+  analogWrite(ENA, turnSpeed);
+  analogWrite(ENB, 0);
+}
+
+
+// ========================================
+// STOP
+// ========================================
+
+void stopRobot() {
+
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+}
+```
